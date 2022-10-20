@@ -1,25 +1,13 @@
 name: ChangeLog
 on:
-  push:
+  pull_request:
     branches:
     - "release/**"
-
-env:
-  VERSION: ${{ github.event.inputs.version }}
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-#      - name: Generate token
-#        id: generate_token
-#        uses: tibdex/github-app-token@v1
-#        with:
-#          app_id: 251311
-#          private_key: ${{ secrets.TOKEN_EXCHANGE_GH_APP_PRIVATE_KEY }}
-#          repository: ${{ github.repository }}
-#          permissions: >-
-#            {"contents": "read"}
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
@@ -28,7 +16,6 @@ jobs:
       - name: Check changelog is modified
         run: |
           files=`(git fetch origin main:main) && (git diff --name-only main)`
-          echo $files
           for file in $files; do
             if [ "$file" = "CHANGELOG.md" ]; then
               exit 0
