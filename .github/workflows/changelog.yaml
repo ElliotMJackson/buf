@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
       - name: Check changelog is modified
         run: |
-          files=`(git fetch origin master:master) && (git diff --name-only master)`
+          files=`(git fetch origin main:main) && (git diff --name-only main)`
           echo $files
           for file in $files; do
             if [ "$file" = "CHANGELOG.md" ]; then
