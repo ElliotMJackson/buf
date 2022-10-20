@@ -1,6 +1,7 @@
 name: ChangeLog
 on:
   push:
+    branches:
     - "release/**"
 
 env:
