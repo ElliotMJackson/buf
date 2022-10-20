@@ -1,5 +1,6 @@
 ![The Buf logo](./.github/buf-logo.svg)
 
+
 # Buf
 
 [![License](https://img.shields.io/github/license/bufbuild/buf?color=blue)][badges_license]
