@@ -35,8 +35,6 @@ jobs:
         working-directory: ${env.BUFBUILD_BUF_DIR}
         run: make installbuf
       - name: Update Buf Version
-        env:
-        - VERSION: ${env.VERSION}
         run: make updateversion
       - name: Create PR
         uses: peter-evans/create-pull-request@ad43dccb4d726ca8514126628bec209b8354b6dd
