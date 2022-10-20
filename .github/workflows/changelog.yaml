@@ -28,8 +28,8 @@ jobs:
       - name: Check changelog is modified
         run: |
           files=`git diff --name-only`
+          echo $files
           for file in $files; do
-            echo $file
             if [ "$file" = "CHANGELOG.md" ]; then
               exit 0
             fi
