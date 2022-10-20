@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
       - name: Check changelog is modified
         run: |
-          files=`git diff --name-only origin/main origin/${GITHUB_HEAD_REF}`
+          files=`git diff --name-only`
           for file in $files; do
             echo $file
             if [ "$file" = "CHANGELOG.md" ]; then
