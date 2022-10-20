@@ -1,8 +1,7 @@
 name: ChangeLog
 on:
-  pull_request:
-    branches:
-      - release/**
+  push:
+    - release/**
 
 env:
   VERSION: ${{ github.event.inputs.version }}
