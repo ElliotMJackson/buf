@@ -30,7 +30,6 @@ jobs:
         with:
           go-version: '^1.19.x'
       - name: Install Buf
-        working-directory: ${env.GITHUB_WORKSPACE}
         run: make installbuf
       - name: Update Buf Version
         run: make updateversion
