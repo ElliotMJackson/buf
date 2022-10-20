@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [v0.0.0] - 2022-10-20
 
 - No changes yet.
 
