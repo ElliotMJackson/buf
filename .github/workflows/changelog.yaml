@@ -1,6 +1,6 @@
 name: ChangeLog
 on:
-  pull_request:
+  push:
     branches:
       - 'release/**'
 
