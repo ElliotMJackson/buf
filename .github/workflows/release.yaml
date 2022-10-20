@@ -8,7 +8,7 @@ on:
 
 env:
   DEV_DIR: "${env.GITHUB_WORKSPACE}/dev"
-  BUFBUILD_BUF_DIR: "${{env.DEV_DIR}}/buf"
+  BUFBUILD_BUF_DIR: "${{DEV_DIR}}/buf"
   VERSION: ${{ github.event.inputs.message }}
 
 jobs:
