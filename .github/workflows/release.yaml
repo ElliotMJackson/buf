@@ -15,19 +15,19 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: 251311
-          private_key: ${{ secrets.TOKEN_EXCHANGE_GH_APP_PRIVATE_KEY }}
-          repository: ${{ github.repository }}
-          permissions: >-
-            {"contents": "write", "pull_requests": "write"}
+#      - name: Generate token
+#        id: generate_token
+#        uses: tibdex/github-app-token@v1
+#        with:
+#          app_id: 251311
+#          private_key: ${{ secrets.TOKEN_EXCHANGE_GH_APP_PRIVATE_KEY }}
+#          repository: ${{ github.repository }}
+#          permissions: >-
+#            {"contents": "write", "pull_requests": "write"}
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-go@v3
         with:
           go-version: '^1.19.x'
@@ -48,4 +48,4 @@ jobs:
             Release prepared for ${env.VERSION}
             
             Reminder: Update the changelog
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
