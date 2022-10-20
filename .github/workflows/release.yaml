@@ -32,7 +32,7 @@ jobs:
       - name: Install Buf
         run: make installbuf
       - name: Update Buf Version
-        run: make updateversion
+        run: make updateversion VERSION=${{ github.event.inputs.message }}
       - name: Create PR
         uses: peter-evans/create-pull-request@ad43dccb4d726ca8514126628bec209b8354b6dd
         with:
