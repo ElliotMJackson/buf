@@ -2,7 +2,7 @@ name: ChangeLog
 on:
   pull_request:
     branches:
-    - "release/**"
+      - 'release/**'
 
 jobs:
   verify:
