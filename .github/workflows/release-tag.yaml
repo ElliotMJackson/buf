@@ -12,6 +12,7 @@ jobs:
       - name: Split branch name
         env:
           BRANCH: ${{ github.ref_name }}
+<<<<<<< Updated upstream
         run: echo "VERSION=v${BRANCH##*/}" >> $GITHUB_STATE
       - name: Checkout repository code
         uses: actions/checkout@v3
@@ -24,3 +25,15 @@ jobs:
           git push origin :${{env.VERSION}} 2> /dev/null || echo 'remote ref does not exist'
           git tag ${{env.VERSION}}
           git push origin ${{env.VERSION}}
+=======
+        id: split
+        run: echo "::set-output name=version::${BRANCH##*/}"
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+      - name: Tag Release
+        env:
+          VERSION: ${{ steps.split.outputs.version }}
+        run: |
+          git tag -a "v${VERSION}" -m "v${VERSION}"
+          git push origin "v${VERSION}"
+>>>>>>> Stashed changes
