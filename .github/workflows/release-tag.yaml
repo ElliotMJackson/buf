@@ -2,13 +2,19 @@ name: Release
 
 on:
   pull_request:
-    types: [closed]
+    types: [ closed ]
 
 jobs:
   tag:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release')
     steps:
+      - name: echo
+        run: |
+          GITHUB_BASE_REF=${{env.GITHUB_BASE_REF}}
+          GITHUB_HEAD_REF=${{env.GITHUB_HEAD_REF}}
+          GITHUB_REF=${{env.GITHUB_REF}}
+          GITHUB_REF_NAME=${{env.GITHUB_REF_NAME}}
       - name: Set VERSION variable from tag
         run: |
           VERSION=${{ github.ref_name }}
@@ -19,8 +25,8 @@ jobs:
           fetch-depth: 0
       - name: Tag Release
         run: |
-          git config --global user.name "abc"
-          git config --global user.email "abc@example.com"
+          git config --global user.name ${{env.GITHUB_ACTOR}}
+          git config --global user.email "info@buf.buil"
           git tag -d ${{env.VERSION}} 2> /dev/null || echo 'local ref does not exist'
           git push origin :${{env.VERSION}} 2> /dev/null || echo 'remote ref does not exist'
           git tag ${{env.VERSION}}
