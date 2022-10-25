@@ -37,9 +37,9 @@ jobs:
       - name: Release
         id: ghr
         uses: softprops/action-gh-release@v1
-        working-directory: ${{env.GITHUB_WORKSPACE}}/.build/release/buf/assets
-        generate_release_notes: true # change to the CHANGELOG somehow
         with:
+          generate_release_notes: true # change to the CHANGELOG somehow
+          working-directory: ${{github.workspace}}/.build/release/buf/assets
           files: |
             $(find .)
 #      - name: Slack Notification
