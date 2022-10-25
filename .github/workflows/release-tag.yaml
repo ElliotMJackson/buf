@@ -2,18 +2,13 @@ name: Release
 
 on:
   pull_request:
-<<<<<<< Updated upstream
     types: [ closed ]
-=======
-    types: [closed]
->>>>>>> Stashed changes
 
 jobs:
   tag:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release')
     steps:
-<<<<<<< Updated upstream
       - name: Set VERSION variable from tag
         run: |
           VERSION=${{github.head_ref}}
@@ -25,23 +20,8 @@ jobs:
       - name: Tag Release
         run: |
           git config --global user.name ${{env.GITHUB_ACTOR}}
-          git config --global user.email "info@buf.buil"
+          git config --global user.email "info@buf.build"
           git tag -d ${{env.VERSION}} 2> /dev/null || echo 'local ref does not exist'
           git push origin :${{env.VERSION}} 2> /dev/null || echo 'remote ref does not exist'
           git tag ${{env.VERSION}}
           git push origin ${{env.VERSION}}
-=======
-      - name: Split branch name
-        env:
-          BRANCH: ${{ github.ref_name }}
-        id: split
-        run: echo "::set-output name=version::${BRANCH##*/}"
-      - name: Checkout repository code
-        uses: actions/checkout@v3
-      - name: Tag Release
-        env:
-          VERSION: ${{ steps.split.outputs.version }}
-        run: |
-          git tag -a "v${VERSION}" -m "v${VERSION}"
-          git push origin "v${VERSION}"
->>>>>>> Stashed changes
