@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release')
     steps:
-      - name: Split branch name
-        env:
-          BRANCH: ${{ github.ref_name }}
-        run: echo "VERSION=v${BRANCH##*/}" >> $GITHUB_STATE
+      - name: Set VERSION variable from tag
+        run: |
+          VERSION=${{ env.ref_name }}
+          echo "VERSION=${VERSION##*/}" >> $GITHUB_ENV
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
