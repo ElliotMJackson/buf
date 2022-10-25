@@ -11,10 +11,10 @@ jobs:
     steps:
       - name: echo
         run: |
-          GITHUB_BASE_REF=${{env.GITHUB_BASE_REF}}
-          GITHUB_HEAD_REF=${{env.GITHUB_HEAD_REF}}
-          GITHUB_REF=${{env.GITHUB_REF}}
-          GITHUB_REF_NAME=${{env.GITHUB_REF_NAME}}
+          GITHUB_BASE_REF=$GITHUB_BASE_REF
+          GITHUB_HEAD_REF=$GITHUB_HEAD_REF
+          GITHUB_REF=$GITHUB_REF
+          GITHUB_REF_NAME=$GITHUB_REF_NAME
       - name: Set VERSION variable from tag
         run: |
           VERSION=${{ github.ref_name }}

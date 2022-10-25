@@ -38,7 +38,7 @@ jobs:
         uses: peter-evans/create-pull-request@ad43dccb4d726ca8514126628bec209b8354b6dd
         with:
           add-paths: .
-          commit-message: "updateversion"
+          commit-message: "Update version to v${{env.VERSION}}"
           branch: release/v${{env.VERSION}}
           delete-branch: true
           title: "Release v${{env.VERSION}}"
