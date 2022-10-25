@@ -15,8 +15,11 @@ jobs:
         run: echo "VERSION=v${BRANCH##*/}" >> $GITHUB_STATE
       - name: Checkout repository code
         uses: actions/checkout@v3
+        depth: 1
       - name: Tag Release
         run: |
+          git config --global user.name "abc"
+          git config --global user.email "abc@example.com"
           git tag -d ${{env.VERSION}} 2> /dev/null || echo 'local ref does not exist'
           git push origin :${{env.VERSION}} 2> /dev/null || echo 'remote ref does not exist'
           git tag ${{env.VERSION}}
