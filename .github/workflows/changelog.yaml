@@ -1,4 +1,5 @@
 name: ChangeLog
+
 on:
   push:
     branches:

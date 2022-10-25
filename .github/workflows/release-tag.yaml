@@ -1,0 +1,24 @@
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && startsWith(github.ref_name, 'release')
+    steps:
+      - name: Split branch name
+        env:
+          BRANCH: ${{ github.ref_name }}
+        id: split
+        run: echo "::set-output name=version::${BRANCH##*/}"
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+      - name: Tag Release
+        env:
+          VERSION: ${{ steps.split.outputs.version }}
+        run: |
+          git tag -a "v${VERSION}" -m "v${VERSION}"
+          git push origin "v${VERSION}"
