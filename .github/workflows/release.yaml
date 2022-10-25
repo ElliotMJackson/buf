@@ -51,3 +51,4 @@ jobs:
         run: |
           jq --null-input '{ text: "BufCLI Release v${{env.VERSION}} has started: ${{ steps.cpr.outputs.pull-request-url }}" }' \
           | curl -sSL -X POST -H 'Content-Type: application/json' -d @- '${{ secrets.SLACK_RELEASE_NOTIFICATION_WEBHOOK }}'
+

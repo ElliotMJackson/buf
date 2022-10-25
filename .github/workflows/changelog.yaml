@@ -4,6 +4,7 @@ on:
     branches:
       - 'release/**'
 
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -23,3 +24,5 @@ jobs:
           done
           echo ERROR: CHANGELOG has not been updated
           exit 1
+
+
