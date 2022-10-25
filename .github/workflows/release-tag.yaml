@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Set VERSION variable from tag
         run: |
-          VERSION=${{ env.ref_name }}
+          VERSION=${{ github.ref_name }}
           echo "VERSION=${VERSION##*/}" >> $GITHUB_ENV
       - name: Checkout repository code
         uses: actions/checkout@v3
