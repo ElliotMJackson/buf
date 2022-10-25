@@ -9,15 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release')
     steps:
-      - name: echo
-        run: |
-          GITHUB_BASE_REF=${{github.base_ref}}
-          GITHUB_HEAD_REF=${{github.head_ref}}
-          GITHUB_REF=${{github.ref}}
-          GITHUB_REF_NAME=${{github.ref_name}}
       - name: Set VERSION variable from tag
         run: |
-          VERSION=${{ github.ref_name }}
+          VERSION=${{github.head_ref}}
           echo "VERSION=${VERSION##*/}" >> $GITHUB_ENV
       - name: Checkout repository code
         uses: actions/checkout@v3
