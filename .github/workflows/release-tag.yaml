@@ -7,7 +7,7 @@ on:
 jobs:
   tag:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && startsWith(github.ref_name, 'release')
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release')
     steps:
       - name: Split branch name
         env:
