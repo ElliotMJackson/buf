@@ -1,9 +1,9 @@
 name: ChangeLog
+
 on:
   push:
     branches:
       - 'release/**'
-
 
 jobs:
   verify:
@@ -24,5 +24,3 @@ jobs:
           done
           echo ERROR: CHANGELOG has not been updated
           exit 1
-
-
