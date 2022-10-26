@@ -36,6 +36,10 @@ jobs:
         run: echo ${{ github.sha }} > Release.txt
       - name: Test
         run: cat Release.txt
+      - name: Set FILES variable from tag
+        working-directory: ${{github.workspace}}/.build/release/buf/assets
+        run: |
+          echo "FILES=$(find .)" >> $GITHUB_ENV
       - name: Release
         id: ghr
         uses: softprops/action-gh-release@v1
@@ -43,7 +47,7 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           generate_release_notes: true # change to the CHANGELOG somehow
-          files: *
+          files: ${{env.FILES}}
 #      - name: Slack Notification
 #        run: |
 #          jq --null-input '{ text: "BufCLI Release v${{env.VERSION}} is complete: ${{ steps.ghr.outputs.url }}" }' \
