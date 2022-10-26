@@ -13,15 +13,15 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: 251311
-          private_key: ${{ secrets.TOKEN_EXCHANGE_GH_APP_PRIVATE_KEY }}
-          repository: ${{ github.repository }}
-          permissions: >-
-            {"contents": "write", "pull_requests": "write"}
+#      - name: Generate token
+#        id: generate_token
+#        uses: tibdex/github-app-token@v1
+#        with:
+#          app_id: 251311
+#          private_key: ${{ secrets.TOKEN_EXCHANGE_GH_APP_PRIVATE_KEY }}
+#          repository: ${{ github.repository }}
+#          permissions: >-
+#            {"contents": "write", "pull_requests": "write"}
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
@@ -47,7 +47,7 @@ jobs:
             
             Reminder: Update the changelog
           token: ${{ secrets.PAT }}
-      - name: Slack Notification
-        run: |
-          jq --null-input '{ text: "BufCLI Release v${{env.VERSION}} has started: ${{ steps.cpr.outputs.pull-request-url }}" }' \
-          | curl -sSL -X POST -H 'Content-Type: application/json' -d @- '${{ secrets.SLACK_RELEASE_NOTIFICATION_WEBHOOK }}'
+#      - name: Slack Notification
+#        run: |
+#          jq --null-input '{ text: "BufCLI Release v${{env.VERSION}} has started: ${{ steps.cpr.outputs.pull-request-url }}" }' \
+#          | curl -sSL -X POST -H 'Content-Type: application/json' -d @- '${{ secrets.SLACK_RELEASE_NOTIFICATION_WEBHOOK }}'
