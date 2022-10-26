@@ -33,7 +33,10 @@ jobs:
 #      - name: Create assets
 #        run: make bufrelease
       - name: Build
-        run: echo ${{ github.sha }} > ${{github.workspace}}/.build/release/buf/assets/Release.txt
+        run: |
+          mkdir -p ${{github.workspace}}/.build/release/buf/assets/
+          touch ${{github.workspace}}/.build/release/buf/assets/Release.txt
+          echo ${{ github.sha }} > ${{github.workspace}}/.build/release/buf/assets/Release.txt
       - name: Test
         run: cat ${{github.workspace}}/.build/release/buf/assets/Release.txt
       - name: Set FILES variable from tag
