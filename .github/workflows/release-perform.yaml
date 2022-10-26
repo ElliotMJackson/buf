@@ -39,11 +39,11 @@ jobs:
       - name: Release
         id: ghr
         uses: softprops/action-gh-release@v1
+        working-directory: ${{github.workspace}}/.build/release/buf/assets
         with:
+          token: ${{ secrets.PAT }}
           generate_release_notes: true # change to the CHANGELOG somehow
-          working-directory: ${{github.workspace}}/.build/release/buf/assets
-          files: |
-            $(find .)
+          files: *
 #      - name: Slack Notification
 #        run: |
 #          jq --null-input '{ text: "BufCLI Release v${{env.VERSION}} is complete: ${{ steps.ghr.outputs.url }}" }' \
