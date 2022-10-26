@@ -1,4 +1,4 @@
-name: Release
+name: Perform Release
 
 on:
   push:
@@ -33,13 +33,12 @@ jobs:
 #      - name: Create assets
 #        run: make bufrelease
       - name: Build
-        run: echo ${{ github.sha }} > Release.txt
+        run: echo ${{ github.sha }} > ${{github.workspace}}/.build/release/buf/assets/Release.txt
       - name: Test
-        run: cat Release.txt
+        run: cat ${{github.workspace}}/.build/release/buf/assets/Release.txt
       - name: Set FILES variable from tag
-        working-directory: ${{github.workspace}}/.build/release/buf/assets
         run: |
-          echo "FILES=$(find .)" >> $GITHUB_ENV
+          echo "FILES=$(find ${{github.workspace}}/.build/release/buf/assets -type f)" >> $GITHUB_ENV
       - name: Release
         id: ghr
         uses: softprops/action-gh-release@v1
