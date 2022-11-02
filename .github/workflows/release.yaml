@@ -70,7 +70,7 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
           fetch-depth: 0
       - name: Check changelog is modified
         run: |
@@ -127,7 +127,7 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
           fetch-depth: 0
       - name: Set VERSION variable from tag
         run: |
@@ -178,7 +178,7 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
           fetch-depth: 0
       - name: Set NEXT VERSION variable from tag
         run: |
@@ -193,7 +193,8 @@ jobs:
         with:
           add-paths: .
           commit-message: "Back to development"
-          branch: main
+          branch: next/${{env.NEXT_VERSION}}
+          base: main
           delete-branch: true
           title: "Return to development"
           body: Release complete for ${{github.ref_name}}
