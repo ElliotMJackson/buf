@@ -70,7 +70,7 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
       - name: Check changelog is modified
         run: |
@@ -127,7 +127,7 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
       - name: Set VERSION variable from tag
         run: |
@@ -178,7 +178,7 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
       - name: Set NEXT VERSION variable from tag
         run: |
