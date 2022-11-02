@@ -64,7 +64,7 @@ import (
 
 const (
 	// Version is the CLI version of buf.
-	Version = "0.0.2"
+	Version = "v0.0.3-dev"
 
 	inputHTTPSUsernameEnvKey      = "BUF_INPUT_HTTPS_USERNAME"
 	inputHTTPSPasswordEnvKey      = "BUF_INPUT_HTTPS_PASSWORD"
