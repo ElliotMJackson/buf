@@ -18,11 +18,6 @@ on:
 
 env:
   VERSION: ${{ github.event.inputs.version }}
-<<<<<<< Updated upstream
-=======
-  RELEASE_MINISIGN_PRIVATE_KEY: ${{ secrets.RELEASE_PRIVATE_KEY }}
-  RELEASE_MINISIGN_PRIVATE_KEY_PASSWORD: ${{ secrets.RELEASE_PRIVATE_KEY_PASSWORD }}
->>>>>>> Stashed changes
   APP_ID: 251311
 
 jobs:
@@ -30,7 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' }}
     steps:
-<<<<<<< Updated upstream
 #      - name: Generate token
 #        id: generate_token
 #        uses: tibdex/github-app-token@v1
@@ -40,21 +34,10 @@ jobs:
 #          repository: ${{ github.repository }}
 #          permissions: >-
 #            {"contents": "write", "pull_requests": "write"}
-=======
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: ${{env.APP_ID}}
-          private_key: ${{ secrets.TOKEN_EXCHANGE_GH_APP_PRIVATE_KEY }}
-          repository: ${{ github.repository }}
-          permissions: >-
-            {"contents": "write", "pull_requests": "write"}
->>>>>>> Stashed changes
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ secrets.PAT }}
       - uses: actions/setup-go@v3
         with:
           go-version: '^1.19.x'
@@ -75,11 +58,11 @@ jobs:
             Release prepared for ${{env.VERSION}}
             
             Reminder: Update the changelog
-          token: ${{ steps.generate_token.outputs.token }}
-      - name: Slack Notification
-        run: |
-          jq --null-input '{ text: "BufCLI Release v${{env.VERSION}} has started: ${{ steps.cpr.outputs.pull-request-url }}" }' \
-          | curl -sSL -X POST -H 'Content-Type: application/json' -d @- '${{ secrets.SLACK_RELEASE_NOTIFICATION_WEBHOOK }}'
+          token: ${{ secrets.PAT }}
+#      - name: Slack Notification
+#        run: |
+#          jq --null-input '{ text: "BufCLI Release v${{env.VERSION}} has started: ${{ steps.cpr.outputs.pull-request-url }}" }' \
+#          | curl -sSL -X POST -H 'Content-Type: application/json' -d @- '${{ secrets.SLACK_RELEASE_NOTIFICATION_WEBHOOK }}'
   verify:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'release') }}
@@ -103,7 +86,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release') }}
     steps:
-<<<<<<< Updated upstream
 #      - name: Generate token
 #        id: generate_token
 #        uses: tibdex/github-app-token@v1
@@ -113,17 +95,6 @@ jobs:
 #          repository: ${{ github.repository }}
 #          permissions: >-
 #            {"contents": "write"}
-=======
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: ${{env.APP_ID}}
-          private_key: ${{ secrets.TOKEN_EXCHANGE_GH_APP_PRIVATE_KEY }}
-          repository: ${{ github.repository }}
-          permissions: >-
-            {"contents": "write"}
->>>>>>> Stashed changes
       - name: Set VERSION variable from tag
         run: |
           VERSION=${{github.head_ref}}
@@ -131,11 +102,11 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ secrets.PAT }}
           fetch-depth: 0
       - name: Tag Release
         run: |
-          git config --global user.password ${{ steps.generate_token.outputs.token }}
+          git config --global user.password ${{ secrets.PAT }}
           git tag -d ${{env.VERSION}} 2> /dev/null || echo 'local ref does not exist'
           git push origin :${{env.VERSION}} 2> /dev/null || echo 'remote ref does not exist'
           git tag ${{env.VERSION}}
@@ -144,7 +115,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') && github.ref_type == 'tag'}}
     steps:
-<<<<<<< Updated upstream
 #      - name: Generate token
 #        id: generate_token
 #        uses: tibdex/github-app-token@v1
@@ -154,17 +124,6 @@ jobs:
 #          repository: ${{ github.repository }}
 #          permissions: >-
 #            {"contents": "write", "pull_requests": "write"}
-=======
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: ${{env.APP_ID}}
-          private_key: ${{ secrets.TOKEN_EXCHANGE_GH_APP_PRIVATE_KEY }}
-          repository: ${{ github.repository }}
-          permissions: >-
-            {"contents": "write", "pull_requests": "write"}
->>>>>>> Stashed changes
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
@@ -176,7 +135,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '^1.19.x'
-<<<<<<< Updated upstream
       #      - name: Create assets
       #        env:
       #          RELEASE_MINISIGN_PRIVATE_KEY: ${{secrets.RELEASE_MINISIGN_PRIVATE_KEY}}
@@ -186,17 +144,6 @@ jobs:
       #        run: |
       #          unset RELEASE_MINISIGN_PRIVATE_KEY
       #          unset RELEASE_MINISIGN_PRIVATE_KEY_PASSWORD
-=======
-      - name: Create assets
-        env:
-          RELEASE_MINISIGN_PRIVATE_KEY: ${{secrets.RELEASE_MINISIGN_PRIVATE_KEY}}
-          RELEASE_MINISIGN_PRIVATE_KEY_PASSWORD: ${{secrets.RELEASE_MINISIGN_PRIVATE_KEY_PASSWORD}}
-        run: make bufrelease
-      - name: unset keys
-        run: |
-          unset RELEASE_MINISIGN_PRIVATE_KEY
-          unset RELEASE_MINISIGN_PRIVATE_KEY_PASSWORD
->>>>>>> Stashed changes
       - name: Set FILES variable from tag
         run: |
           mkdir -p ${{github.workspace}}/.build/release/buf/assets
@@ -207,19 +154,18 @@ jobs:
         id: ghr
         uses: softprops/action-gh-release@v1
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ secrets.PAT }}
           generate_release_notes: true # change to the CHANGELOG somehow
           files: |
             ${{env.FILES}}
-      - name: Slack Notification
-        run: |
-          jq --null-input '{ text: "BufCLI Release v${{env.VERSION}} is complete: ${{ steps.ghr.outputs.url }}" }' \
-          | curl -sSL -X POST -H 'Content-Type: application/json' -d @- '${{ secrets.SLACK_RELEASE_NOTIFICATION_WEBHOOK }}'
+#      - name: Slack Notification
+#        run: |
+#          jq --null-input '{ text: "BufCLI Release v${{env.VERSION}} is complete: ${{ steps.ghr.outputs.url }}" }' \
+#          | curl -sSL -X POST -H 'Content-Type: application/json' -d @- '${{ secrets.SLACK_RELEASE_NOTIFICATION_WEBHOOK }}'
   post-release:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
     steps:
-<<<<<<< Updated upstream
 #      - name: Generate token
 #        id: generate_token
 #        uses: tibdex/github-app-token@v1
@@ -229,17 +175,6 @@ jobs:
 #          repository: ${{ github.repository }}
 #          permissions: >-
 #            {"contents": "write", "pull_requests": "write"}
-=======
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: ${{env.APP_ID}}
-          private_key: ${{ secrets.TOKEN_EXCHANGE_GH_APP_PRIVATE_KEY }}
-          repository: ${{ github.repository }}
-          permissions: >-
-            {"contents": "write", "pull_requests": "write"}
->>>>>>> Stashed changes
       - name: Checkout repository code
         uses: actions/checkout@v3
         with:
@@ -260,13 +195,7 @@ jobs:
           commit-message: "Back to development"
           branch: next/${{env.NEXT_VERSION}}
           delete-branch: true
-<<<<<<< Updated upstream
           base: main
           title: "Return to development"
           body: Release complete for ${{github.ref_name}}
           token: ${{ secrets.PAT }}
-=======
-          title: "Return to development"
-          body: Release complete for ${{github.ref_name}}
-          token: ${{ steps.generate_token.outputs.token }}
->>>>>>> Stashed changes
