@@ -18,7 +18,7 @@ on:
 
 env:
   VERSION: ${{ github.event.inputs.version }}
-  APP_ID: 251311
+  APP_ID: 259356
 
 jobs:
   prepare:
