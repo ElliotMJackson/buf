@@ -31,6 +31,8 @@ jobs:
           touch ${{github.workspace}}/.build/release/buf/assets/asset_two.txt
           echo "this is asset one" >> ${{github.workspace}}/.build/release/buf/assets/asset_two.txt
       - name: Release
+        env: 
+          PATH: ${{github.workspace}}/.build/release/buf/assets
         id: ghr
         uses: softprops/action-gh-release@v1
         with:
@@ -38,5 +40,5 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           generate_release_notes: true # change to the CHANGELOG somehow
           files: |
-            asset_one.txt
-            asset_two.txt
+            ${{env.PATH}}/asset_one.txt
+            ${{env.PATH}}/asset_two.txt
