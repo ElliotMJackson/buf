@@ -39,5 +39,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           generate_release_notes: true # change to the CHANGELOG somehow
           files: |
-            ${{env.PATH}}/asset_one.txt
-            ${{env.PATH}}/asset_two.txt
+            ${{env.PATH}}/*
