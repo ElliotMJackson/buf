@@ -30,13 +30,6 @@ jobs:
           echo "this is asset one" >> ${{github.workspace}}/.build/release/buf/assets/asset_one.txt
           touch ${{github.workspace}}/.build/release/buf/assets/asset_two.txt
           echo "this is asset one" >> ${{github.workspace}}/.build/release/buf/assets/asset_two.txt
-      - name: Tag Release
-        run: |
-          git config --global user.password ${{ steps.generate_token.outputs.token }}
-          git tag -d ${{env.VERSION}} 2> /dev/null || echo 'local ref does not exist'
-          git push origin :${{env.VERSION}} 2> /dev/null || echo 'remote ref does not exist'
-          git tag ${{env.VERSION}}
-          git push origin ${{env.VERSION}}
       - name: Release
         id: ghr
         uses: softprops/action-gh-release@v1
