@@ -28,14 +28,22 @@ jobs:
           mkdir -p ${{github.workspace}}/.build/release/buf/assets
           touch ${{github.workspace}}/.build/release/buf/assets/asset_one.txt
           echo "this is asset one" >> ${{github.workspace}}/.build/release/buf/assets/asset_one.txt
-      - name: Set FILES variable from tag
+          touch ${{github.workspace}}/.build/release/buf/assets/asset_two.txt
+          echo "this is asset one" >> ${{github.workspace}}/.build/release/buf/assets/asset_two.txt
+      - name: Tag Release
         run: |
-          echo "FILES=$(find ${{github.workspace}}/.build/release/buf/assets -type f)" >> $GITHUB_ENV
+          git config --global user.password ${{ steps.generate_token.outputs.token }}
+          git tag -d ${{env.VERSION}} 2> /dev/null || echo 'local ref does not exist'
+          git push origin :${{env.VERSION}} 2> /dev/null || echo 'remote ref does not exist'
+          git tag ${{env.VERSION}}
+          git push origin ${{env.VERSION}}
       - name: Release
         id: ghr
         uses: softprops/action-gh-release@v1
         with:
+          working-directory: ${{github.workspace}}/.build/release/buf/assets
           token: ${{ secrets.GITHUB_TOKEN }}
           generate_release_notes: true # change to the CHANGELOG somehow
           files: |
-            ${{env.FILES}}
+            asset_one.txt
+            asset_two.txt
