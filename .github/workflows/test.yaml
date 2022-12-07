@@ -36,7 +36,6 @@ jobs:
         id: ghr
         uses: softprops/action-gh-release@v1
         with:
-          working-directory: ${{github.workspace}}/.build/release/buf/assets
           token: ${{ secrets.GITHUB_TOKEN }}
           generate_release_notes: true # change to the CHANGELOG somehow
           files: |
