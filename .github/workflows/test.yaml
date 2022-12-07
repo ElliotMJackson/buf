@@ -1,4 +1,4 @@
-name: Release
+name: test
 on:
   workflow_dispatch:
     inputs:
@@ -28,8 +28,6 @@ jobs:
           mkdir -p ${{github.workspace}}/.build/release/buf/assets
           touch ${{github.workspace}}/.build/release/buf/assets/asset_one.txt
           echo "this is asset one" >> ${{github.workspace}}/.build/release/buf/assets/asset_one.txt
-          touch ${{github.workspace}}/.build/release/buf/assets/asset_two.txt
-          echo "this is asset two" >> ${{github.workspace}}/.build/release/buf/assets/asset_two.txt
       - name: Set FILES variable from tag
         run: |
           echo "FILES=$(find ${{github.workspace}}/.build/release/buf/assets -type f)" >> $GITHUB_ENV
