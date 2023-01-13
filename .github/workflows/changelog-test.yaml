@@ -5,13 +5,20 @@ on:
       version:
         type: string
         description: The version you intend to release (eg x.y.z)
+  push:
+    tags:
+      - v*
 
 env:
   VERSION: ${{ github.event.inputs.version }}
-  jobs:
-  prepare:
+
+jobs:
+  changelog:
     runs-on: ubuntu-latest
     steps:
+      - name: Set VERSION variable from tag
+        run: |
+          echo "VERSION=${{github.ref_name}}" >> $GITHUB_ENV
       - name: Generate Changelog
         run: ./github/actions/changelog-action/entrypoint.sh > ${{env.VERSION}}-CHANGELOG.md
       - name: Release
