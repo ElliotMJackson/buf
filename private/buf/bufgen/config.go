@@ -1,4 +1,4 @@
-// Copyright 2020-2022 Buf Technologies, Inc.
+// Copyright 2020-2023 Buf Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -159,9 +159,11 @@ func newConfigV1(logger *zap.Logger, externalConfig ExternalConfigV1, id string)
 		}
 		pluginConfigs = append(pluginConfigs, pluginConfig)
 	}
+	typesConfig := newTypesConfigV1(externalConfig.Types)
 	return &Config{
 		PluginConfigs: pluginConfigs,
 		ManagedConfig: managedConfig,
+		TypesConfig:   typesConfig,
 	}, nil
 }
 
@@ -246,18 +248,23 @@ func newManagedConfigV1(logger *zap.Logger, externalManagedConfig ExternalManage
 	if err != nil {
 		return nil, err
 	}
-	var optimizeFor *descriptorpb.FileOptions_OptimizeMode
-	if externalManagedConfig.OptimizeFor != "" {
-		value, ok := descriptorpb.FileOptions_OptimizeMode_value[externalManagedConfig.OptimizeFor]
-		if !ok {
-			return nil, fmt.Errorf(
-				"invalid optimize_for value; expected one of %v",
-				enumMapToStringSlice(descriptorpb.FileOptions_OptimizeMode_value),
-			)
-		}
-		optimizeFor = optimizeModePtr(descriptorpb.FileOptions_OptimizeMode(value))
+	csharpNamespaceConfig, err := newCsharpNamespaceConfigV1(externalManagedConfig.CsharpNamespace)
+	if err != nil {
+		return nil, err
+	}
+	optimizeForConfig, err := newOptimizeForConfigV1(externalManagedConfig.OptimizeFor)
+	if err != nil {
+		return nil, err
 	}
 	goPackagePrefixConfig, err := newGoPackagePrefixConfigV1(externalManagedConfig.GoPackagePrefix)
+	if err != nil {
+		return nil, err
+	}
+	objcClassPrefixConfig, err := newObjcClassPrefixConfigV1(externalManagedConfig.ObjcClassPrefix)
+	if err != nil {
+		return nil, err
+	}
+	rubyPackageConfig, err := newRubyPackageConfigV1(externalManagedConfig.RubyPackage)
 	if err != nil {
 		return nil, err
 	}
@@ -282,13 +289,16 @@ func newManagedConfigV1(logger *zap.Logger, externalManagedConfig ExternalManage
 		}
 	}
 	return &ManagedConfig{
-		CcEnableArenas:        externalManagedConfig.CcEnableArenas,
-		JavaMultipleFiles:     externalManagedConfig.JavaMultipleFiles,
-		JavaStringCheckUtf8:   externalManagedConfig.JavaStringCheckUtf8,
-		JavaPackagePrefix:     javaPackagePrefixConfig,
-		OptimizeFor:           optimizeFor,
-		GoPackagePrefixConfig: goPackagePrefixConfig,
-		Override:              override,
+		CcEnableArenas:          externalManagedConfig.CcEnableArenas,
+		JavaMultipleFiles:       externalManagedConfig.JavaMultipleFiles,
+		JavaStringCheckUtf8:     externalManagedConfig.JavaStringCheckUtf8,
+		JavaPackagePrefixConfig: javaPackagePrefixConfig,
+		CsharpNameSpaceConfig:   csharpNamespaceConfig,
+		OptimizeForConfig:       optimizeForConfig,
+		GoPackagePrefixConfig:   goPackagePrefixConfig,
+		ObjcClassPrefixConfig:   objcClassPrefixConfig,
+		RubyPackageConfig:       rubyPackageConfig,
+		Override:                override,
 	}, nil
 }
 
@@ -326,6 +336,63 @@ func newJavaPackagePrefixConfigV1(externalJavaPackagePrefixConfig ExternalJavaPa
 	}
 	return &JavaPackagePrefixConfig{
 		Default:  externalJavaPackagePrefixConfig.Default,
+		Except:   except,
+		Override: override,
+	}, nil
+}
+
+func newOptimizeForConfigV1(externalOptimizeForConfigV1 ExternalOptimizeForConfigV1) (*OptimizeForConfig, error) {
+	if externalOptimizeForConfigV1.IsEmpty() {
+		return nil, nil
+	}
+	if externalOptimizeForConfigV1.Default == "" {
+		return nil, errors.New("optimize_for setting requires a default value")
+	}
+	value, ok := descriptorpb.FileOptions_OptimizeMode_value[externalOptimizeForConfigV1.Default]
+	if !ok {
+		return nil, fmt.Errorf(
+			"invalid optimize_for default value; expected one of %v",
+			enumMapToStringSlice(descriptorpb.FileOptions_OptimizeMode_value),
+		)
+	}
+	defaultOptimizeFor := descriptorpb.FileOptions_OptimizeMode(value)
+	seenModuleIdentities := make(map[string]struct{}, len(externalOptimizeForConfigV1.Except))
+	except := make([]bufmoduleref.ModuleIdentity, 0, len(externalOptimizeForConfigV1.Except))
+	for _, moduleName := range externalOptimizeForConfigV1.Except {
+		moduleIdentity, err := bufmoduleref.ModuleIdentityForString(moduleName)
+		if err != nil {
+			return nil, fmt.Errorf("invalid optimize_for except: %w", err)
+		}
+		if _, ok := seenModuleIdentities[moduleIdentity.IdentityString()]; ok {
+			return nil, fmt.Errorf("invalid optimize_for except: %q is defined multiple times", moduleIdentity.IdentityString())
+		}
+		seenModuleIdentities[moduleIdentity.IdentityString()] = struct{}{}
+		except = append(except, moduleIdentity)
+	}
+	override := make(map[bufmoduleref.ModuleIdentity]descriptorpb.FileOptions_OptimizeMode, len(externalOptimizeForConfigV1.Override))
+	for moduleName, optimizeFor := range externalOptimizeForConfigV1.Override {
+		moduleIdentity, err := bufmoduleref.ModuleIdentityForString(moduleName)
+		if err != nil {
+			return nil, fmt.Errorf("invalid optimize_for override key: %w", err)
+		}
+		value, ok := descriptorpb.FileOptions_OptimizeMode_value[optimizeFor]
+		if !ok {
+			return nil, fmt.Errorf(
+				"invalid optimize_for override value; expected one of %v",
+				enumMapToStringSlice(descriptorpb.FileOptions_OptimizeMode_value),
+			)
+		}
+		if _, ok := seenModuleIdentities[moduleIdentity.IdentityString()]; ok {
+			return nil, fmt.Errorf(
+				"invalid optimize_for override: %q is already defined as an except",
+				moduleIdentity.IdentityString(),
+			)
+		}
+		seenModuleIdentities[moduleIdentity.IdentityString()] = struct{}{}
+		override[moduleIdentity] = descriptorpb.FileOptions_OptimizeMode(value)
+	}
+	return &OptimizeForConfig{
+		Default:  defaultOptimizeFor,
 		Except:   except,
 		Override: override,
 	}, nil
@@ -373,6 +440,118 @@ func newGoPackagePrefixConfigV1(externalGoPackagePrefixConfig ExternalGoPackageP
 	}
 	return &GoPackagePrefixConfig{
 		Default:  defaultGoPackagePrefix,
+		Except:   except,
+		Override: override,
+	}, nil
+}
+
+func newRubyPackageConfigV1(
+	externalRubyPackageConfig ExternalRubyPackageConfigV1,
+) (*RubyPackageConfig, error) {
+	if externalRubyPackageConfig.IsEmpty() {
+		return nil, nil
+	}
+	seenModuleIdentities := make(map[string]struct{}, len(externalRubyPackageConfig.Except))
+	except := make([]bufmoduleref.ModuleIdentity, 0, len(externalRubyPackageConfig.Except))
+	for _, moduleName := range externalRubyPackageConfig.Except {
+		moduleIdentity, err := bufmoduleref.ModuleIdentityForString(moduleName)
+		if err != nil {
+			return nil, fmt.Errorf("invalid ruby_package except: %w", err)
+		}
+		if _, ok := seenModuleIdentities[moduleIdentity.IdentityString()]; ok {
+			return nil, fmt.Errorf("invalid ruby_package except: %q is defined multiple times", moduleIdentity.IdentityString())
+		}
+		seenModuleIdentities[moduleIdentity.IdentityString()] = struct{}{}
+		except = append(except, moduleIdentity)
+	}
+	override := make(map[bufmoduleref.ModuleIdentity]string, len(externalRubyPackageConfig.Override))
+	for moduleName, rubyPackage := range externalRubyPackageConfig.Override {
+		moduleIdentity, err := bufmoduleref.ModuleIdentityForString(moduleName)
+		if err != nil {
+			return nil, fmt.Errorf("invalid ruby_package override key: %w", err)
+		}
+		if _, ok := seenModuleIdentities[moduleIdentity.IdentityString()]; ok {
+			return nil, fmt.Errorf("invalid ruby_package override: %q is already defined as an except", moduleIdentity.IdentityString())
+		}
+		seenModuleIdentities[moduleIdentity.IdentityString()] = struct{}{}
+		override[moduleIdentity] = rubyPackage
+	}
+	return &RubyPackageConfig{
+		Except:   except,
+		Override: override,
+	}, nil
+}
+
+func newCsharpNamespaceConfigV1(
+	externalCsharpNamespaceConfig ExternalCsharpNamespaceConfigV1,
+) (*CsharpNameSpaceConfig, error) {
+	if externalCsharpNamespaceConfig.IsEmpty() {
+		return nil, nil
+	}
+	seenModuleIdentities := make(map[string]struct{}, len(externalCsharpNamespaceConfig.Except))
+	except := make([]bufmoduleref.ModuleIdentity, 0, len(externalCsharpNamespaceConfig.Except))
+	for _, moduleName := range externalCsharpNamespaceConfig.Except {
+		moduleIdentity, err := bufmoduleref.ModuleIdentityForString(moduleName)
+		if err != nil {
+			return nil, fmt.Errorf("invalid csharp_namespace except: %w", err)
+		}
+		if _, ok := seenModuleIdentities[moduleIdentity.IdentityString()]; ok {
+			return nil, fmt.Errorf("invalid csharp_namespace except: %q is defined multiple times", moduleIdentity.IdentityString())
+		}
+		seenModuleIdentities[moduleIdentity.IdentityString()] = struct{}{}
+		except = append(except, moduleIdentity)
+	}
+	override := make(map[bufmoduleref.ModuleIdentity]string, len(externalCsharpNamespaceConfig.Override))
+	for moduleName, csharpNamespace := range externalCsharpNamespaceConfig.Override {
+		moduleIdentity, err := bufmoduleref.ModuleIdentityForString(moduleName)
+		if err != nil {
+			return nil, fmt.Errorf("invalid csharp_namespace override key: %w", err)
+		}
+		if _, ok := seenModuleIdentities[moduleIdentity.IdentityString()]; ok {
+			return nil, fmt.Errorf("invalid csharp_namespace override: %q is already defined as an except", moduleIdentity.IdentityString())
+		}
+		seenModuleIdentities[moduleIdentity.IdentityString()] = struct{}{}
+		override[moduleIdentity] = csharpNamespace
+	}
+	return &CsharpNameSpaceConfig{
+		Except:   except,
+		Override: override,
+	}, nil
+}
+
+func newObjcClassPrefixConfigV1(externalObjcClassPrefixConfig ExternalObjcClassPrefixConfigV1) (*ObjcClassPrefixConfig, error) {
+	if externalObjcClassPrefixConfig.IsEmpty() {
+		return nil, nil
+	}
+	// It's ok to have an empty default, which will have the same effect as previously enabling managed mode.
+	defaultObjcClassPrefix := externalObjcClassPrefixConfig.Default
+	seenModuleIdentities := make(map[string]struct{}, len(externalObjcClassPrefixConfig.Except))
+	except := make([]bufmoduleref.ModuleIdentity, 0, len(externalObjcClassPrefixConfig.Except))
+	for _, moduleName := range externalObjcClassPrefixConfig.Except {
+		moduleIdentity, err := bufmoduleref.ModuleIdentityForString(moduleName)
+		if err != nil {
+			return nil, fmt.Errorf("invalid objc_class_prefix except: %w", err)
+		}
+		if _, ok := seenModuleIdentities[moduleIdentity.IdentityString()]; ok {
+			return nil, fmt.Errorf("invalid objc_class_prefix except: %q is defined multiple times", moduleIdentity.IdentityString())
+		}
+		seenModuleIdentities[moduleIdentity.IdentityString()] = struct{}{}
+		except = append(except, moduleIdentity)
+	}
+	override := make(map[bufmoduleref.ModuleIdentity]string, len(externalObjcClassPrefixConfig.Override))
+	for moduleName, objcClassPrefix := range externalObjcClassPrefixConfig.Override {
+		moduleIdentity, err := bufmoduleref.ModuleIdentityForString(moduleName)
+		if err != nil {
+			return nil, fmt.Errorf("invalid objc_class_prefix override key: %w", err)
+		}
+		if _, ok := seenModuleIdentities[moduleIdentity.IdentityString()]; ok {
+			return nil, fmt.Errorf("invalid objc_class_prefix override: %q is already defined as an except", moduleIdentity.IdentityString())
+		}
+		seenModuleIdentities[moduleIdentity.IdentityString()] = struct{}{}
+		override[moduleIdentity] = objcClassPrefix
+	}
+	return &ObjcClassPrefixConfig{
+		Default:  defaultObjcClassPrefix,
 		Except:   except,
 		Override: override,
 	}, nil
@@ -429,7 +608,7 @@ func newManagedConfigV1Beta1(externalOptionsConfig ExternalOptionsConfigV1Beta1,
 	if !enabled || externalOptionsConfig == (ExternalOptionsConfigV1Beta1{}) {
 		return nil, nil
 	}
-	var optimizeFor *descriptorpb.FileOptions_OptimizeMode
+	var optimizeForConfig *OptimizeForConfig
 	if externalOptionsConfig.OptimizeFor != "" {
 		value, ok := descriptorpb.FileOptions_OptimizeMode_value[externalOptionsConfig.OptimizeFor]
 		if !ok {
@@ -438,12 +617,16 @@ func newManagedConfigV1Beta1(externalOptionsConfig ExternalOptionsConfigV1Beta1,
 				enumMapToStringSlice(descriptorpb.FileOptions_OptimizeMode_value),
 			)
 		}
-		optimizeFor = optimizeModePtr(descriptorpb.FileOptions_OptimizeMode(value))
+		optimizeForConfig = &OptimizeForConfig{
+			Default:  descriptorpb.FileOptions_OptimizeMode(value),
+			Except:   make([]bufmoduleref.ModuleIdentity, 0),
+			Override: make(map[bufmoduleref.ModuleIdentity]descriptorpb.FileOptions_OptimizeMode),
+		}
 	}
 	return &ManagedConfig{
 		CcEnableArenas:    externalOptionsConfig.CcEnableArenas,
 		JavaMultipleFiles: externalOptionsConfig.JavaMultipleFiles,
-		OptimizeFor:       optimizeFor,
+		OptimizeForConfig: optimizeForConfig,
 	}, nil
 }
 
@@ -457,17 +640,19 @@ func enumMapToStringSlice(enums map[string]int32) []string {
 	return slice
 }
 
-// optimizeModePtr is a convenience function for initializing the
-// *descriptorpb.FileOptions_OptimizeMode type in-line. This is
-// also useful in unit tests.
-func optimizeModePtr(value descriptorpb.FileOptions_OptimizeMode) *descriptorpb.FileOptions_OptimizeMode {
-	return &value
-}
-
 type readConfigOptions struct {
 	override string
 }
 
 func newReadConfigOptions() *readConfigOptions {
 	return &readConfigOptions{}
+}
+
+func newTypesConfigV1(in *ExternalTypesConfigV1) *TypesConfig {
+	if in == nil {
+		return nil
+	}
+	return &TypesConfig{
+		Include: in.Include,
+	}
 }

@@ -6,9 +6,6 @@ GO_BINS := $(GO_BINS) \
 	cmd/buf \
 	cmd/protoc-gen-buf-breaking \
 	cmd/protoc-gen-buf-lint \
-	private/bufpkg/bufprotoplugin/cmd/protoc-gen-go-api \
-	private/bufpkg/bufprotoplugin/cmd/protoc-gen-go-apiclient \
-	private/bufpkg/bufprotoplugin/cmd/protoc-gen-go-apiclientconnect \
 	private/bufpkg/bufstyle/cmd/bufstyle \
 	private/bufpkg/bufwkt/cmd/wkt-go-data \
 	private/pkg/bandeps/cmd/bandeps \
@@ -32,7 +29,7 @@ FILE_IGNORES := $(FILE_IGNORES) \
 	private/pkg/storage/storageos/tmp/
 LICENSE_HEADER_LICENSE_TYPE := apache
 LICENSE_HEADER_COPYRIGHT_HOLDER := Buf Technologies, Inc.
-LICENSE_HEADER_YEAR_RANGE := 2020-2022
+LICENSE_HEADER_YEAR_RANGE := 2020-2023
 LICENSE_HEADER_IGNORES := \/testdata enterprise
 # Comment out to use released buf
 BUF_GO_INSTALL_PATH := ./cmd/buf
@@ -99,9 +96,6 @@ privateusage:
 postprepostgenerate:: privateusage
 
 bufgeneratedeps:: \
-	installprotoc-gen-go-api \
-	installprotoc-gen-go-apiclient \
-	installprotoc-gen-go-apiclientconnect \
 	$(PROTOC_GEN_GO) $(PROTOC_GEN_CONNECT_GO)
 
 .PHONY: bufgeneratecleango
@@ -113,6 +107,7 @@ bufgenerateclean:: bufgeneratecleango
 .PHONY: bufgenerateprotogo
 bufgenerateprotogo:
 	$(BUF_BIN) generate proto --template data/template/buf.go.gen.yaml
+	$(BUF_BIN) generate buf.build/grpc/grpc --include-types grpc.reflection.v1.ServerReflection --template data/template/buf.go.gen.yaml
 
 .PHONY: bufgenerateprotogoclient
 bufgenerateprotogoclient:
@@ -124,7 +119,7 @@ bufgeneratesteps:: \
 
 .PHONY: bufrelease
 bufrelease: $(MINISIGN)
-	DOCKER_IMAGE=golang:1.19.3-bullseye bash make/buf/scripts/release.bash
+	DOCKER_IMAGE=golang:1.19.4-bullseye bash make/buf/scripts/release.bash
 
 # We have to manually set the Homebrew version on the Homebrew badge as there
 # is no badge on shields.io for Homebrew packages outside of homebrew-core

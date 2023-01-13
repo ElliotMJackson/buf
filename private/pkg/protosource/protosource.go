@@ -1,4 +1,4 @@
-// Copyright 2020-2022 Buf Technologies, Inc.
+// Copyright 2020-2023 Buf Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -295,6 +295,12 @@ type MessageRange interface {
 	Message() Message
 }
 
+// ExtensionRange represents an extension range in Messages.
+type ExtensionRange interface {
+	MessageRange
+	OptionExtensionDescriptor
+}
+
 // Enum is an enum descriptor.
 type Enum interface {
 	NamedDescriptor
@@ -336,6 +342,7 @@ type Message interface {
 	Fields() []Field
 	Extensions() []Field
 	Oneofs() []Oneof
+	ExtensionRanges() []ExtensionRange
 	ExtensionMessageRanges() []MessageRange
 	ReservedMessageRanges() []MessageRange
 

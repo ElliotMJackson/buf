@@ -1,4 +1,4 @@
-// Copyright 2020-2022 Buf Technologies, Inc.
+// Copyright 2020-2023 Buf Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ const (
 // NewSetCLIVersionInterceptor returns a new Connect Interceptor that sets the Buf CLI version into all request headers
 func NewSetCLIVersionInterceptor(version string) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
-		return connect.UnaryFunc(func(
+		return func(
 			ctx context.Context,
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
 			req.Header().Set(CliVersionHeaderName, version)
 			return next(ctx, req)
-		})
+		}
 	}
 	return interceptor
 }

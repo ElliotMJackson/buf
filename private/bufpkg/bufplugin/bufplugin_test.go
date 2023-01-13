@@ -1,4 +1,4 @@
-// Copyright 2020-2022 Buf Technologies, Inc.
+// Copyright 2020-2023 Buf Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ func TestPluginToProtoPluginRegistryType(t *testing.T) {
 }
 
 func assertPluginToPluginRegistryType(t testing.TB, config *bufpluginconfig.RegistryConfig, registryType registryv1alpha1.PluginRegistryType) {
-	plugin, err := NewPlugin("v1.0.0", nil, nil, config, "sha256:digest", "", "")
+	plugin, err := NewPlugin("v1.0.0", nil, config, "sha256:digest", "", "")
 	require.Nil(t, err)
 	assert.Equal(t, registryType, PluginToProtoPluginRegistryType(plugin))
 }
