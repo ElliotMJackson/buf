@@ -1,0 +1,23 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: The version you intend to release (eg x.y.z)
+
+env:
+  VERSION: ${{ github.event.inputs.version }}
+  jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Changelog
+        run: ./github/actions/changelog-action/entrypoint.sh > ${{env.VERSION}}-CHANGELOG.md
+      - name: Release
+        id: ghr
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: ${{env.VERSION}}-CHANGELOG.md
+          files: |
+            ${{github.workspace}}/.build/release/buf/assets/*
