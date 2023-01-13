@@ -13,7 +13,7 @@ while IFS= read -r line; do
     echo "$line"
   fi
   #If the line starts with ## & not currently printing, enable printing
-  if [[ $line == \#\#* ]] && [[ $printing == false ]]; then
+  if [[ $line == "## [$VERSION]"* ]] && [[ $printing == false ]]; then
     printing=true
   fi
 done <"$filename"
