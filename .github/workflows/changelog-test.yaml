@@ -20,7 +20,7 @@ jobs:
         run: |
           echo "VERSION=${{github.ref_name}}" >> $GITHUB_ENV
       - name: Generate Changelog
-        run: ./github/actions/changelog-action/entrypoint.sh > ${{env.VERSION}}-CHANGELOG.md
+        run: .github/actions/changelog-action/entrypoint.sh > ${{env.VERSION}}-CHANGELOG.md
       - name: Release
         id: ghr
         uses: softprops/action-gh-release@v1
