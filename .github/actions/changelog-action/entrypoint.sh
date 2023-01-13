@@ -1,6 +1,6 @@
 #!/bin/bash
 
-filename="../../../CHANGELOG.md"
+filename="CHANGELOG.md"
 printing=false
 #While loop to read line by line
 while IFS= read -r line; do
